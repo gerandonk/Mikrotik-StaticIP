@@ -18,11 +18,11 @@ class MikrotikStatic
         return [
             'title' => 'Mikrotik STATIC',
             'description' => 'To handle connection between PHPNuxBill with Mikrotik STATIC',
-            'author' => 'ibnux',
+            'author' => 'Gerandonk',
             'url' => [
-                'Github' => 'https://github.com/hotspotbilling/phpnuxbill/',
-                'Telegram' => 'https://t.me/phpnuxbill',
-                'Donate' => 'https://paypal.me/ibnux'
+                'Github' => 'https://github.com/gerandonk/Mikrotik-StaticIP',
+                'Telegram' => 'https://t.me/sklitinov',
+                'Donate' => 'https://paypal.me/sklitinov'
             ]
         ];
     }
