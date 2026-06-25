@@ -49,9 +49,36 @@ class MikrotikStatic
 			} else {
 				$unitup = 'M';
 			}
-			$rate = $bw['rate_up'] . $unitup . "/" . $bw['rate_down'] . $unitdown;
-			if(!empty(trim($bw['burst']))){
-				$rate .= ' '.$bw['burst'];
+			$rate_full_string = $bw['rate_up'] . $unitup . "/" . $bw['rate_down'] . $unitdown;
+			if (!empty(trim($bw['burst']))) {
+				$rate_full_string .= ' ' . trim($bw['burst']);
+			}
+		
+			$parts = explode(" ", $rate_full_string);
+
+			$max_limit_val = "";
+			$burst_limit_val = "";
+			$burst_threshold_val = "";
+			$burst_time_val = "";
+			$priority_val = "";
+			$limit_at_val = "";
+
+			if (count($parts) >= 1) {
+				$max_limit_val = $parts[0];
+			}
+		
+			if (count($parts) >= 6) {
+				$burst_limit_val     = $parts[1];
+				$burst_threshold_val = $parts[2];
+				$burst_time_val      = $parts[3];
+
+				if (strpos($parts[4], '/') === false) {
+					$priority_val = $parts[4] . "/" . $parts[4];
+				} else {
+					$priority_val = $parts[4];
+				}
+
+				$limit_at_val = $parts[5];
 			}
             //$setRequest = new RouterOS\Request('/ip/dhcp-server/lease/set');
 			$setRequest = new RouterOS\Request('/queue/simple/set');
@@ -62,13 +89,35 @@ class MikrotikStatic
 				$setRequest->setArgument('name', $customer['username']);
 			}
 			$setRequest->setArgument('target', $customer['pppoe_ip']);
-			$setRequest->setArgument('max-limit', $rate);
+			$setRequest->setArgument('max-limit', $max_limit_val);
+			if (!empty($burst_limit_val)) {
+				$setRequest->setArgument('burst-limit', $burst_limit_val);
+			}
+			if (!empty($burst_threshold_val)) {
+				$setRequest->setArgument('burst-threshold', $burst_threshold_val);
+			}
+			if (!empty($burst_time_val)) {
+				$setRequest->setArgument('burst-time', $burst_time_val);
+			}
+			if (!empty($priority_val)) {
+				$setRequest->setArgument('priority', $priority_val);
+			}
+			if (!empty($limit_at_val)) {
+				$setRequest->setArgument('limit-at', $limit_at_val);
+			}
+			// Uncomment to set parent queue
+			//$setRequest->setArgument('parent', 'Global');
 			$setRequest->setArgument('comment', $plan['name_plan'] . ' | ' . $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])));
 			$client->sendSync($setRequest);
 			if (!$isExp){
 				$this->removeIpFromAddressList($client, $customer['pppoe_ip']);
 			}
         }
+    }
+	
+	function sync_customer($customer, $plan)
+    {
+        $this->add_customer($customer, $plan);
     }
 
     function remove_customer($customer, $plan)
@@ -250,10 +299,38 @@ class MikrotikStatic
         } else {
             $unitup = 'M';
         }
-        $rate = $bw['rate_up'] . $unitup . "/" . $bw['rate_down'] . $unitdown;
-        if(!empty(trim($bw['burst']))){
-            $rate .= ' '.$bw['burst'];
-        }
+        $rate_full_string = $bw['rate_up'] . $unitup . "/" . $bw['rate_down'] . $unitdown;
+        if (!empty(trim($bw['burst']))) {
+			$rate_full_string .= ' ' . trim($bw['burst']);
+		}
+		
+		$parts = explode(" ", $rate_full_string);
+
+		$max_limit_val = "";
+		$burst_limit_val = "";
+		$burst_threshold_val = "";
+		$burst_time_val = "";
+		$priority_val = "";
+		$limit_at_val = "";
+
+		if (count($parts) >= 1) {
+			$max_limit_val = $parts[0];
+		}
+		
+		if (count($parts) >= 6) {
+			$burst_limit_val     = $parts[1];
+			$burst_threshold_val = $parts[2];
+			$burst_time_val      = $parts[3];
+
+			if (strpos($parts[4], '/') === false) {
+				$priority_val = $parts[4] . "/" . $parts[4];
+			} else {
+				$priority_val = $parts[4];
+			}
+
+			$limit_at_val = $parts[5];
+		}
+		
 		if (!$isExp) {
 			$this->removeIpFromAddressList($client, $customer['pppoe_ip']);
 		}
@@ -264,7 +341,24 @@ class MikrotikStatic
 			$setRequest->setArgument('name', $customer['username']);
 		}
         $setRequest->setArgument('target', $customer['pppoe_ip']);
-		$setRequest->setArgument('max-limit', $rate);
+		$setRequest->setArgument('max-limit', $max_limit_val);
+		if (!empty($burst_limit_val)) {
+			$setRequest->setArgument('burst-limit', $burst_limit_val);
+		}
+		if (!empty($burst_threshold_val)) {
+			$setRequest->setArgument('burst-threshold', $burst_threshold_val);
+		}
+		if (!empty($burst_time_val)) {
+			$setRequest->setArgument('burst-time', $burst_time_val);
+		}
+		if (!empty($priority_val)) {
+			$setRequest->setArgument('priority', $priority_val);
+		}
+		if (!empty($limit_at_val)) {
+			$setRequest->setArgument('limit-at', $limit_at_val);
+		}
+		// Uncomment to set parent queue
+		//$setRequest->setArgument('parent', 'Global');
         $setRequest->setArgument('comment', $plan['name_plan'] . ' | ' . $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])));
         $client->sendSync($setRequest);
     }
